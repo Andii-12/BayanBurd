@@ -3,23 +3,32 @@
 import { IssuePriorityBadge, IssueStatusBadge, AssetTypeBadge } from "@/components/ui/badges";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
-import { api } from "@/lib/api";
+import { ImageGallery, ImagePicker, isImageUrl } from "@/components/image-picker";
+import { api, toFormData } from "@/lib/api";
 import { formatDate, nameOf } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function IssueDetailPage() {
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
   const { data: issue } = useQuery({ queryKey: ["issue", id], queryFn: () => api(`/api/issues/${id}`) });
   const [body, setBody] = useState("");
+  const [commentImages, setCommentImages] = useState<File[]>([]);
   const comment = useMutation({
-    mutationFn: () => api(`/api/issues/${id}/comments`, { method: "POST", body: JSON.stringify({ body, visibility: "PUBLIC" }) }),
+    mutationFn: () =>
+      api(`/api/issues/${id}/comments`, {
+        method: "POST",
+        body: toFormData({ body, visibility: "PUBLIC" }, commentImages),
+      }),
     onSuccess: () => {
       setBody("");
+      setCommentImages([]);
       qc.invalidateQueries({ queryKey: ["issue", id] });
     },
+    onError: (e: any) => toast.error(e.message),
   });
   if (!issue) return null;
   const asset = issue.assetId || {};
@@ -31,10 +40,13 @@ export default function IssueDetailPage() {
         <div className="mt-2"><IssueStatusBadge status={issue.status} /></div>
         <div className="card mt-4 whitespace-pre-wrap p-5 text-sm leading-relaxed">{issue.description}</div>
         {issue.attachments?.length > 0 && (
-          <div className="mt-3 text-sm">
-            {issue.attachments.map((a: any) => (
-              <a key={a.url} href={a.url} className="mr-3 text-primary underline">{a.name}</a>
-            ))}
+          <div className="mt-3">
+            <ImageGallery urls={issue.attachments.filter(isImageUrl).map((a: any) => a.url)} />
+            <div className="mt-2 text-sm">
+              {issue.attachments.filter((a: any) => !isImageUrl(a)).map((a: any) => (
+                <a key={a.url} href={a.url} className="mr-3 text-primary underline">{a.name}</a>
+              ))}
+            </div>
           </div>
         )}
         <h2 className="mt-8 text-sm font-semibold">Comments</h2>
@@ -46,6 +58,20 @@ export default function IssueDetailPage() {
                 <span>{formatDate(c.createdAt)}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm">{c.body}</p>
+              {c.attachments?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {c.attachments.map((a: any) =>
+                    isImageUrl(a) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <a key={a.url} href={a.url} target="_blank" rel="noreferrer">
+                        <img src={a.url} alt={a.name} className="h-20 w-20 rounded-md object-cover" />
+                      </a>
+                    ) : (
+                      <a key={a.url} href={a.url} className="text-sm text-primary underline">{a.name}</a>
+                    )
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -57,6 +83,9 @@ export default function IssueDetailPage() {
           }}
         >
           <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Сэтгэгдэл бичих..." />
+          <div className="mt-2">
+            <ImagePicker files={commentImages} onChange={setCommentImages} max={4} label="Зураг хавсаргах" />
+          </div>
           <Button className="mt-2" disabled={!body || comment.isPending}>Илгээх</Button>
         </form>
         <h2 className="mt-8 text-sm font-semibold">Activity</h2>

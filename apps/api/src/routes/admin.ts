@@ -7,6 +7,7 @@ import {
   Installation,
   Issue,
   Order,
+  RefreshToken,
   User,
 } from "../models";
 import { asyncHandler, AppError, paginate } from "../utils/http";
@@ -200,6 +201,33 @@ router.patch(
     if (req.body.password) update.passwordHash = await hashPassword(req.body.password);
     const user = await User.findByIdAndUpdate(req.params.id, update, { new: true }).select("-passwordHash");
     res.json(user);
+  })
+);
+
+router.delete(
+  "/users/:id",
+  requireAuth,
+  requireSuperAdmin,
+  asyncHandler(async (req: AuthRequest, res) => {
+    if (String(req.user!._id) === req.params.id) {
+      throw new AppError(400, "Өөрийн бүртгэлийг устгах боломжгүй");
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) throw new AppError(404, "Хэрэглэгч олдсонгүй");
+    if (user.role === "SUPER_ADMIN") {
+      const remaining = await User.countDocuments({ role: "SUPER_ADMIN", _id: { $ne: user._id } });
+      if (remaining < 1) throw new AppError(400, "Сүүлчийн SUPER_ADMIN-ийг устгах боломжгүй");
+    }
+    await RefreshToken.deleteMany({ userId: user._id });
+    await user.deleteOne();
+    await audit({
+      userId: String(req.user!._id),
+      action: "USER_DELETE",
+      entity: "User",
+      entityId: String(user._id),
+      metadata: { email: user.email, role: user.role },
+    });
+    res.json({ ok: true });
   })
 );
 

@@ -19,7 +19,7 @@ import {
   signRefreshToken,
   verifyPassword,
 } from "../services/auth";
-import { sendEmail, emailTemplates } from "../services/email";
+import { sendEmailSafe, emailTemplates } from "../services/email";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 import { env } from "../config/env";
 
@@ -63,8 +63,8 @@ router.post(
     const refreshToken = signRefreshToken(String(user._id));
     await persistRefreshToken(String(user._id), refreshToken);
     setRefreshCookie(res, refreshToken);
-    const t = emailTemplates.registration(body.companyName);
-    await sendEmail(user.email, t.subject, t.html);
+    const t = emailTemplates.registration(body.companyName, `${env.frontendUrl}/login`);
+    await sendEmailSafe(user.email, t.subject, t.html);
     res.status(201).json({ user: publicUser(user), client, accessToken });
   })
 );
@@ -132,11 +132,9 @@ router.post(
       user.passwordResetToken = crypto.createHash("sha256").update(token).digest("hex");
       user.passwordResetExpires = new Date(Date.now() + 3600_000);
       await user.save();
-      await sendEmail(
-        user.email,
-        "Нууц үг сэргээх",
-        `<p>Нууц үг сэргээх холбоос: ${env.frontendUrl}/reset-password?token=${token}</p>`
-      );
+      const resetUrl = `${env.frontendUrl}/reset-password?token=${token}`;
+      const t = emailTemplates.passwordReset(resetUrl);
+      await sendEmailSafe(user.email, t.subject, t.html);
     }
     res.json({ ok: true, message: "Хэрэв имэйл бүртгэлтэй бол заавар илгээгдлээ." });
   })

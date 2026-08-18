@@ -46,6 +46,7 @@ export const productSchema = z.object({
   stock: z.number().int().min(0).optional(),
   specifications: z.record(z.string()).optional(),
   images: z.array(z.string()).optional(),
+  thumbnail: z.string().optional(),
   installationAvailable: z.boolean().optional(),
   warrantyMonths: z.number().int().min(0).optional(),
   supportMonths: z.number().int().min(0).optional(),

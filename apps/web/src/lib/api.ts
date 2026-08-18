@@ -17,12 +17,17 @@ async function parse(res: Response) {
 export async function api<T = any>(path: string, init: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
   const headers = new Headers(init.headers);
-  if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
+  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  let res = await fetch(`${API}${path}`, { ...init, headers, credentials: "include" });
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, { ...init, headers, credentials: "include" });
+  } catch {
+    throw new ApiError(503, "API сервер ажиллахгүй байна. Терминалд npm run dev:api ажиллуулна уу.");
+  }
   if (res.status === 401 && !path.startsWith("/api/auth/")) {
     const refreshed = await fetch(`${API}/api/auth/refresh`, { method: "POST", credentials: "include" });
     if (refreshed.ok) {
@@ -36,3 +41,10 @@ export async function api<T = any>(path: string, init: RequestInit = {}): Promis
 }
 
 export const apiUrl = API;
+
+export function toFormData(fields: Record<string, string>, files: File[], field = "files") {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields)) fd.append(k, v);
+  for (const file of files) fd.append(field, file);
+  return fd;
+}

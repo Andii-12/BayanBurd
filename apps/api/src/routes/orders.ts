@@ -149,7 +149,7 @@ router.patch(
             manufacturer: undefined,
             status: item.installation || product.installationAvailable ? "INSTALLATION_PENDING" : "ACTIVE",
             warrantyMonths: product.warrantyMonths,
-            image: product.images[0],
+            image: product.thumbnail || product.images[0],
           });
           await AssetStatusHistory.create({
             assetId: asset._id,

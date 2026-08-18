@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { formatMnt } from "@/lib/utils";
+import { formatMnt, productThumb } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 import { Heart, GitCompare } from "lucide-react";
 import { PRODUCT_TYPE_MN, type ProductType } from "@bbe/types";
@@ -10,12 +10,13 @@ import { toast } from "sonner";
 
 export function ProductCard({ product }: { product: any }) {
   const cart = useCart();
+  const thumb = productThumb(product);
   return (
     <div className="card flex flex-col overflow-hidden transition hover:shadow-md">
       <div className="flex h-40 items-center justify-center bg-primary-light text-primary">
-        {product.images?.[0] ? (
+        {thumb ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+          <img src={thumb} alt="" className="h-full w-full object-cover" />
         ) : (
           <span className="text-sm font-medium">{product.sku}</span>
         )}

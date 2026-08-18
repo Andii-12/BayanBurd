@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Logo } from "@/components/logo";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [form, setForm] = useState({
     companyName: "",
     registrationNumber: "",
@@ -34,7 +36,8 @@ export default function RegisterPage() {
           try {
             const data = await api("/api/auth/register", { method: "POST", body: JSON.stringify(form) });
             localStorage.setItem("accessToken", data.accessToken);
-            toast.success("Бүртгэл амжилттай");
+            await refresh();
+            toast.success("Бүртгэл амжилттай. Имэйл илгээлээ.");
             router.push("/dashboard");
           } catch (err: any) {
             toast.error(err.message);

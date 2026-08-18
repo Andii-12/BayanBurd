@@ -2,9 +2,10 @@
 
 import { AppFooter, AppHeader } from "@/components/public-shell";
 import { Button } from "@/components/ui/button";
+import { ImageGallery } from "@/components/image-picker";
 import { api } from "@/lib/api";
 import { useCart } from "@/lib/cart";
-import { formatMnt } from "@/lib/utils";
+import { formatMnt, productThumb } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -30,12 +31,16 @@ export default function ProductDetailPage() {
       <AppHeader />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-2">
-          <div className="card flex h-80 items-center justify-center bg-primary-light text-primary">
-            {p.images?.[0] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.images[0]} alt="" className="h-full w-full object-cover" />
+          <div className="card overflow-hidden bg-primary-light text-primary">
+            {productThumb(p) || p.images?.length ? (
+              <ImageGallery
+                urls={[p.thumbnail, ...(p.images || [])].filter(Boolean).filter((u: string, i: number, a: string[]) => a.indexOf(u) === i)}
+                className="p-0"
+              />
             ) : (
-              <span className="text-lg font-medium">{p.sku}</span>
+              <div className="flex h-80 items-center justify-center">
+                <span className="text-lg font-medium">{p.sku}</span>
+              </div>
             )}
           </div>
           <div>

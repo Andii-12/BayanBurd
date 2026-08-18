@@ -1,7 +1,25 @@
 import Link from "next/link";
 import { AppFooter, AppHeader } from "@/components/public-shell";
 import { Button } from "@/components/ui/button";
-import { Monitor, Cpu, Printer, Network, Camera, Server, BatteryCharging, Globe, Workflow, Code2, KeyRound, Boxes, Plug } from "lucide-react";
+import {
+  Monitor,
+  Cpu,
+  Printer,
+  Network,
+  Camera,
+  Server,
+  BatteryCharging,
+  Globe,
+  Workflow,
+  Code2,
+  KeyRound,
+  Boxes,
+  Plug,
+  PackageCheck,
+  CircleDot,
+  ShieldCheck,
+  ArrowRight,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -57,22 +75,66 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="text-xl font-semibold">Худалдан авалтын дараа үргэлжилдэг хамтын ажиллагаа</h2>
-        <p className="mt-2 max-w-2xl text-sm text-[#6B7280]">
-          Asset бүртгэл, суурилуулалт, баталгаа, лиценз, засвар, issue tracking, үйлчилгээний түүх — бүгд нэг порталд.
-        </p>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {[
-            ["Asset + Installation", "Худалдан авсан төхөөрөмж, систем таны бүртгэлд орно."],
-            ["GitHub-style Issues", "Асуудлыг бүтээгдэхүүнтэй нь холбож нээнэ. Гар бичгээр бичих шаардлагагүй."],
-            ["Warranty & Support", "Баталгаа, лиценз, дэмжлэгийн хугацааг нэг дороос хянана."],
-          ].map(([t, d]) => (
-            <div key={t} className="card p-5">
-              <h3 className="text-sm font-semibold">{t}</h3>
-              <p className="mt-2 text-sm text-[#6B7280]">{d}</p>
-            </div>
-          ))}
+      <section className="border-t border-[#E5E7EB] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-16 lg:py-20">
+          <p className="text-[13px] font-semibold tracking-[0.16em] text-orange">ХУДАЛДАН АВАЛТЫН ДАРАА</p>
+          <h2 className="mt-3 max-w-2xl text-2xl font-semibold leading-tight md:text-3xl">
+            Хамтын ажиллагаа үргэлжилдэг — бүгд нэг порталд
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280]">
+            Asset бүртгэл, суурилуулалт, баталгаа, лиценз, засвар, issue tracking, үйлчилгээний түүх.
+          </p>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                icon: PackageCheck,
+                title: "Asset + Installation",
+                body: "Худалдан авсан төхөөрөмж, систем таны бүртгэлд орно.",
+                href: "/register",
+              },
+              {
+                icon: CircleDot,
+                title: "GitHub-style Issues",
+                body: "Асуудлыг бүтээгдэхүүнтэй нь холбож нээнэ. Гар бичгээр бичих шаардлагагүй.",
+                href: "/dashboard/issues",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Warranty & Support",
+                body: "Баталгаа, лиценз, дэмжлэгийн хугацааг нэг дороос хянана.",
+                href: "/dashboard/warranty",
+              },
+            ].map((item) => (
+              <Link key={item.title} href={item.href} className="card group p-6 transition hover:border-primary/30 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-light text-primary">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#6B7280]">{item.body}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-[13px] font-medium text-orange">
+                  Дэлгэрэнгүй
+                  <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <ol className="mt-12 grid gap-3 sm:grid-cols-5">
+            {[
+              ["01", "Захиалга"],
+              ["02", "Asset"],
+              ["03", "Суурилуулалт"],
+              ["04", "Issue"],
+              ["05", "Үйлчилгээ"],
+            ].map(([n, label], i) => (
+              <li key={n} className="flex items-center gap-3 rounded-lg border border-[#E5E7EB] bg-[#F7F8F6] px-4 py-3">
+                <span className="text-[12px] font-semibold text-orange">{n}</span>
+                <span className="text-sm font-medium">{label}</span>
+                {i < 4 && <ArrowRight className="ml-auto hidden h-3.5 w-3.5 text-[#D1D5DB] sm:block" />}
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
       <AppFooter />

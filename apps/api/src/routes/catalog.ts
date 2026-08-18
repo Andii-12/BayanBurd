@@ -7,7 +7,7 @@ import { asyncHandler, AppError, paginate } from "../utils/http";
 import { validate } from "../utils/validate";
 import { requireAdmin, requireAuth, optionalAuth, AuthRequest } from "../middleware/auth";
 import { audit } from "../services/audit";
-import { upload } from "../middleware/upload";
+import { uploadImages } from "../middleware/upload";
 import { saveFile } from "../services/storage";
 
 const router = Router();
@@ -154,13 +154,24 @@ router.post(
   "/products/:id/images",
   requireAuth,
   requireAdmin,
-  upload.array("files", 8),
+  uploadImages.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "files", maxCount: 8 },
+  ]),
   asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) throw new AppError(404, "Бүтээгдэхүүн олдсонгүй");
-    const files = (req.files as Express.Multer.File[]) || [];
-    const saved = await Promise.all(files.map((f) => saveFile(f, "products")));
-    product.images.push(...saved.map((s) => s.url));
+    const grouped = (req.files as { thumbnail?: Express.Multer.File[]; files?: Express.Multer.File[] }) || {};
+    const thumb = grouped.thumbnail?.[0];
+    const gallery = grouped.files || [];
+    if (thumb) {
+      const saved = await saveFile(thumb, "products");
+      product.thumbnail = saved.url;
+    }
+    if (gallery.length) {
+      const saved = await Promise.all(gallery.map((f) => saveFile(f, "products")));
+      product.images.push(...saved.map((s) => s.url));
+    }
     await product.save();
     res.json(product);
   })

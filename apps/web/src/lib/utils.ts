@@ -36,3 +36,7 @@ export function nameOf(v: unknown, fallback = "—") {
   const o = v as Record<string, unknown>;
   return String(o.companyName || o.name || `${o.firstName || ""} ${o.lastName || ""}`.trim() || fallback);
 }
+
+export function productThumb(product: { thumbnail?: string; images?: string[] }) {
+  return product.thumbnail || product.images?.[0] || "";
+}

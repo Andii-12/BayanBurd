@@ -1,6 +1,6 @@
 import { Notification, User } from "../models";
 import type { NotificationType } from "@bbe/types";
-import { sendEmail } from "./email";
+import { sendEmailSafe } from "./email";
 
 export async function notifyUser(params: {
   userId: string;
@@ -18,7 +18,7 @@ export async function notifyUser(params: {
     link: params.link,
   });
   if (params.email) {
-    await sendEmail(params.email.to, params.email.subject, params.email.html);
+    await sendEmailSafe(params.email.to, params.email.subject, params.email.html);
   }
 }
 

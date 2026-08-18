@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
-import { api } from "@/lib/api";
+import { ImagePicker } from "@/components/image-picker";
+import { api, toFormData } from "@/lib/api";
 import { ISSUE_CATEGORIES, type AssetType } from "@bbe/types";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,6 +19,8 @@ function Inner() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
+  const [images, setImages] = useState<File[]>([]);
+  const [saving, setSaving] = useState(false);
   const selected = (assets.data?.items || []).find((a: any) => a._id === assetId);
   const cats = useMemo(() => ISSUE_CATEGORIES[(selected?.type as AssetType) || "HARDWARE"], [selected]);
 
@@ -28,12 +31,25 @@ function Inner() {
         className="card mt-4 space-y-3 p-5"
         onSubmit={async (e) => {
           e.preventDefault();
-          const issue = await api("/api/issues", {
-            method: "POST",
-            body: JSON.stringify({ assetId, title, description, category, priority }),
-          });
-          toast.success(`#${issue.issueNumber} үүслээ`);
-          router.push(`/dashboard/issues/${issue._id}`);
+          setSaving(true);
+          try {
+            const issue = await api("/api/issues", {
+              method: "POST",
+              body: JSON.stringify({ assetId, title, description, category, priority }),
+            });
+            if (images.length) {
+              await api(`/api/issues/${issue._id}/attachments`, {
+                method: "POST",
+                body: toFormData({}, images),
+              });
+            }
+            toast.success(`#${issue.issueNumber} үүслээ`);
+            router.push(`/dashboard/issues/${issue._id}`);
+          } catch (err: any) {
+            toast.error(err.message || "Issue үүсгэхэд алдаа гарлаа");
+          } finally {
+            setSaving(false);
+          }
         }}
       >
         <Field label="Asset">
@@ -66,7 +82,8 @@ function Inner() {
         <Field label="Тайлбар">
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
         </Field>
-        <Button>Үүсгэх</Button>
+        <ImagePicker files={images} onChange={setImages} label="Зураг" />
+        <Button disabled={saving}>{saving ? "Хадгалж байна..." : "Үүсгэх"}</Button>
       </form>
     </div>
   );

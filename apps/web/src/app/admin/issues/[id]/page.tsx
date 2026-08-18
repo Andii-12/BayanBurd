@@ -3,7 +3,8 @@
 import { IssuePriorityBadge, IssueStatusBadge, AssetTypeBadge } from "@/components/ui/badges";
 import { Button } from "@/components/ui/button";
 import { Field, Select, Textarea, Input } from "@/components/ui/input";
-import { api } from "@/lib/api";
+import { ImageGallery, ImagePicker, isImageUrl } from "@/components/image-picker";
+import { api, toFormData } from "@/lib/api";
 import { formatDate, nameOf } from "@/lib/utils";
 import { ISSUE_STATUS_MN, ISSUE_PRIORITY_MN, type IssueStatus, type IssuePriority } from "@bbe/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,14 +19,24 @@ export default function AdminIssueDetail() {
   const engineers = useQuery({ queryKey: ["engineers"], queryFn: () => api("/api/admin/engineers") });
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"PUBLIC" | "INTERNAL">("PUBLIC");
+  const [commentImages, setCommentImages] = useState<File[]>([]);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [svc, setSvc] = useState({ cause: "", actionTaken: "", partsReplaced: "", notes: "", createServiceHistory: true });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["issue", id] });
 
   const comment = useMutation({
-    mutationFn: () => api(`/api/issues/${id}/comments`, { method: "POST", body: JSON.stringify({ body, visibility }) }),
-    onSuccess: () => { setBody(""); invalidate(); },
+    mutationFn: () =>
+      api(`/api/issues/${id}/comments`, {
+        method: "POST",
+        body: toFormData({ body, visibility }, commentImages),
+      }),
+    onSuccess: () => {
+      setBody("");
+      setCommentImages([]);
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   if (!issue) return null;
@@ -41,6 +52,11 @@ export default function AdminIssueDetail() {
           <IssuePriorityBadge priority={issue.priority} />
         </div>
         <div className="card mt-4 whitespace-pre-wrap p-5 text-sm">{issue.description}</div>
+        {issue.attachments?.length > 0 && (
+          <div className="mt-3">
+            <ImageGallery urls={issue.attachments.filter(isImageUrl).map((a: any) => a.url)} />
+          </div>
+        )}
         <h2 className="mt-8 text-sm font-semibold">Comments</h2>
         <div className="mt-3 space-y-3">
           {(issue.comments || []).map((c: any) => (
@@ -52,11 +68,22 @@ export default function AdminIssueDetail() {
                 <span>{formatDate(c.createdAt)}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm">{c.body}</p>
+              {c.attachments?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {c.attachments.filter(isImageUrl).map((a: any) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <a key={a.url} href={a.url} target="_blank" rel="noreferrer">
+                      <img src={a.url} alt={a.name} className="h-20 w-20 rounded-md object-cover" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
         <form className="mt-4 space-y-2" onSubmit={(e) => { e.preventDefault(); comment.mutate(); }}>
           <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Сэтгэгдэл / internal note" />
+          <ImagePicker files={commentImages} onChange={setCommentImages} max={4} label="Зураг" />
           <div className="flex gap-2">
             <Select value={visibility} onChange={(e) => setVisibility(e.target.value as any)}>
               <option value="PUBLIC">PUBLIC</option>

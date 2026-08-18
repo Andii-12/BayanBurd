@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./logo";
+import { LoginForm } from "./login-form";
 import { useAuth, isStaff } from "@/lib/auth";
 import { SearchCommand } from "./search-command";
 import { NotificationDropdown } from "./notification-dropdown";
@@ -85,12 +86,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
-    if (!user) router.replace("/login");
-    else if (!isStaff(user.role)) router.replace("/dashboard");
+    if (loading || !user) return;
+    if (!isStaff(user.role)) router.replace("/dashboard");
   }, [user, loading, router]);
 
-  if (loading || !user) return <div className="p-10 text-sm text-[#6B7280]">Ачааллаж байна...</div>;
+  if (loading) return <div className="p-10 text-sm text-[#6B7280]">Ачааллаж байна...</div>;
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-primary-dark px-4">
+        <LoginForm mode="admin" />
+      </div>
+    );
+  }
+
+  if (!isStaff(user.role)) {
+    return <div className="p-10 text-sm text-[#6B7280]">Ачааллаж байна...</div>;
+  }
 
   const side = (
     <aside className="flex h-full w-[250px] flex-col bg-primary-dark text-white">

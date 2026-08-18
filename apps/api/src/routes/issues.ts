@@ -16,7 +16,7 @@ import { nextIssueNumber } from "../services/counters";
 import { audit } from "../services/audit";
 import { notifyAdmins, notifyClientUsers, notifyUser } from "../services/notify";
 import { emailTemplates } from "../services/email";
-import { upload } from "../middleware/upload";
+import { upload, uploadImages } from "../middleware/upload";
 import { saveFile } from "../services/storage";
 import type { IssueStatus } from "@bbe/types";
 
@@ -321,7 +321,7 @@ router.post(
 router.post(
   "/:id/attachments",
   requireAuth,
-  upload.array("files", 8),
+  uploadImages.array("files", 8),
   asyncHandler(async (req: AuthRequest, res) => {
     const issue = await Issue.findById(req.params.id);
     if (!issue) throw new AppError(404, "Issue олдсонгүй");

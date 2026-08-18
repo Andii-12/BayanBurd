@@ -15,6 +15,7 @@ export interface ProductDoc extends Document {
   stock: number;
   specifications: Record<string, string>;
   images: string[];
+  thumbnail?: string;
   documents: { name: string; url: string }[];
   installationAvailable: boolean;
   warrantyMonths: number;
@@ -51,6 +52,7 @@ const schema = new Schema<ProductDoc>(
     stock: { type: Number, default: 0 },
     specifications: { type: Schema.Types.Mixed, default: {} },
     images: { type: [String], default: [] },
+    thumbnail: String,
     documents: { type: [{ name: String, url: String }], default: [] },
     installationAvailable: { type: Boolean, default: false },
     warrantyMonths: { type: Number, default: 12 },
