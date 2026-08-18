@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 import type { AssetType, AssetStatus } from "@bbe/types";
 
-export interface AssetDoc extends Document {
+export interface AssetDoc extends Omit<Document, "model"> {
   assetCode: string;
   clientId: Types.ObjectId;
   orderId?: Types.ObjectId;
