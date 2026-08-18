@@ -1,8 +1,14 @@
 import dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-dotenv.config();
+const envFiles = [
+  path.resolve(__dirname, "../../.env"),
+  path.resolve(process.cwd(), "apps/api/.env"),
+  path.resolve(process.cwd(), ".env"),
+];
+for (const file of envFiles) {
+  dotenv.config({ path: file });
+}
 
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",

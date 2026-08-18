@@ -47,13 +47,14 @@ function smtp() {
 export async function sendEmail(to: string, subject: string, html: string) {
   const client = resend();
   if (client) {
-    const { error } = await client.emails.send({
+    const { data, error } = await client.emails.send({
       from: env.resendFrom,
       to,
       subject,
       html,
     });
     if (error) throw new Error(error.message || "Resend имэйл илгээгдсэнгүй");
+    console.log("[email] Resend илгээлээ", { to, subject, id: data?.id });
     return;
   }
   const t = smtp();
@@ -68,7 +69,7 @@ export async function sendEmailSafe(to: string, subject: string, html: string) {
   try {
     await sendEmail(to, subject, html);
   } catch (err) {
-    console.error("[email]", err);
+    console.error("[email] илгээгдсэнгүй:", err instanceof Error ? err.message : err);
   }
 }
 

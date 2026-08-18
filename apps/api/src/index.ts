@@ -64,6 +64,7 @@ async function main() {
   app.use(errorHandler);
   app.listen(env.port, () => {
     console.log(`API listening on ${env.port}`);
+    console.log(`Email: ${env.resendApiKey ? "Resend" : env.smtpHost ? "SMTP" : "disabled (no RESEND_API_KEY)"}`);
   });
 }
 
