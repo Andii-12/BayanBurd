@@ -1,0 +1,24 @@
+{
+  "name": "bayan-burd-eternity",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bayan Burd Eternity — B2B technology portal, asset management, and issue tracking",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "npm run dev -w @bbe/web",
+    "dev:api": "npm run dev -w @bbe/api",
+    "build": "npm run build --workspaces --if-present",
+    "seed": "npm run seed -w @bbe/api",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

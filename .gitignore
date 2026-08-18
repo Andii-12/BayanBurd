@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build / cache
+dist/
+.next/
+out/
+.turbo/
+.vercel/
+*.tsbuildinfo
+
+# Environment and secrets (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# Local uploads (API STORAGE_DRIVER=local)
+uploads/
+apps/api/uploads/
+
+# Logs and test output
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.idea/
+*.swp
+*.swo
+
+# Optional local tooling
+*.pem
+.cache/
+tmp/
+temp/

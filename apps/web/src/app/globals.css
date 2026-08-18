@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #28521f;
+  --primary-dark: #1d3c17;
+  --primary-light: #eaf3e7;
+  --orange: #f7934c;
+  --orange-dark: #e7772d;
+  --background: #f7f8f6;
+  --card: #ffffff;
+  --text-primary: #171717;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-[#E5E7EB] rounded-lg shadow-card;
+  }
+  .label {
+    @apply text-[13px] font-medium text-[#6B7280];
+  }
+}
