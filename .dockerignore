@@ -10,6 +10,5 @@ README.md
 vercel.json
 docker-compose.yml
 uploads
-apps/web/src
-apps/web/public
-apps/web/.next
+apps/web
+packages

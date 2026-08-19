@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "sync:vendor": "node ../../scripts/sync-api-vendor.js",
     "build": "tsc -p ../../packages/types/tsconfig.json && tsc -p ../../packages/validation/tsconfig.json && tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "seed": "tsx src/seed/index.ts"

@@ -1,7 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Railway Root Directory is /apps/api, so the build context is this folder.
 COPY package.json tsconfig.json ./
 COPY vendor ./vendor
 COPY src ./src
