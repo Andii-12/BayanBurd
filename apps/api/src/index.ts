@@ -5,7 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import path from "path";
-import { env } from "./config/env";
+import { env, corsOrigins } from "./config/env";
 import { connectDbWithRetry } from "./config/db";
 import { errorHandler } from "./utils/http";
 import authRoutes from "./routes/auth";
@@ -27,7 +27,13 @@ async function main() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   app.use(
     cors({
-      origin: env.frontendUrl,
+      origin(origin, callback) {
+        if (!origin || corsOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
       credentials: true,
     })
   );

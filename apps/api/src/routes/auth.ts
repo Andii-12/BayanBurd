@@ -26,10 +26,11 @@ import { env } from "../config/env";
 const router = Router();
 
 function setRefreshCookie(res: import("express").Response, token: string) {
+  const crossSite = !env.frontendUrl.includes("localhost");
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: env.nodeEnv === "production",
+    sameSite: crossSite ? "none" : "lax",
+    secure: crossSite || env.nodeEnv === "production",
     maxAge: 7 * 24 * 3600 * 1000,
     path: "/api/auth",
   });
@@ -108,7 +109,11 @@ router.post(
   asyncHandler(async (req, res) => {
     const token = req.cookies?.refreshToken;
     if (token) await revokeRefreshToken(token);
-    res.clearCookie("refreshToken", { path: "/api/auth" });
+    res.clearCookie("refreshToken", {
+      path: "/api/auth",
+      sameSite: env.frontendUrl.includes("localhost") ? "lax" : "none",
+      secure: !env.frontendUrl.includes("localhost") || env.nodeEnv === "production",
+    });
     res.json({ ok: true });
   })
 );
