@@ -140,6 +140,8 @@ router.post(
       const resetUrl = `${env.frontendUrl}/reset-password?token=${token}`;
       const t = emailTemplates.passwordReset(resetUrl);
       await sendEmailSafe(user.email, t.subject, t.html);
+    } else {
+      console.log("[email] password reset: бүртгэлгүй имэйл, илгээгээгүй");
     }
     res.json({ ok: true, message: "Хэрэв имэйл бүртгэлтэй бол заавар илгээгдлээ." });
   })

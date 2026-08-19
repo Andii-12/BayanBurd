@@ -53,8 +53,10 @@ export async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     });
-    if (error) throw new Error(error.message || "Resend имэйл илгээгдсэнгүй");
-    console.log("[email] Resend илгээлээ", { to, subject, id: data?.id });
+    if (error) {
+      throw new Error(error.message || JSON.stringify(error) || "Resend имэйл илгээгдсэнгүй");
+    }
+    console.log("[email] Resend илгээлээ", { to, subject, from: env.resendFrom, id: data?.id });
     return;
   }
   const t = smtp();

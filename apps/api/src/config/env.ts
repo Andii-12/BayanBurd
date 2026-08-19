@@ -39,10 +39,18 @@ export const env = {
   smtpPort: Number(process.env.SMTP_PORT || 587),
   smtpUser: process.env.SMTP_USER || "",
   smtpPass: process.env.SMTP_PASS || "",
-  smtpFrom: process.env.SMTP_FROM || process.env.RESEND_FROM || "Bayan Burd Eternity <noreply@eternity.mn>",
+  smtpFrom: process.env.SMTP_FROM || process.env.RESEND_FROM || "Bayan Burd Eternity <noreply@service.bb-eternity.mn>",
   resendApiKey: process.env.RESEND_API_KEY || "",
-  resendFrom: process.env.RESEND_FROM || process.env.SMTP_FROM || "Bayan Burd Eternity <onboarding@resend.dev>",
+  resendFrom: resolveResendFrom(),
 };
+
+function resolveResendFrom() {
+  const domain = (process.env.RESEND_DOMAIN || "service.bb-eternity.mn").replace(/^@/, "");
+  const verifiedFrom = `Bayan Burd Eternity <noreply@${domain}>`;
+  const from = process.env.RESEND_FROM || process.env.SMTP_FROM || "";
+  if (!from || /resend\.dev/i.test(from)) return verifiedFrom;
+  return from;
+}
 
 function originVariants(url: string) {
   const normalized = url.replace(/\/+$/, "");

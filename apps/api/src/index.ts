@@ -71,7 +71,9 @@ async function main() {
   await new Promise<void>((resolve, reject) => {
     const server = app.listen(env.port, "0.0.0.0", () => {
       console.log(`API listening on 0.0.0.0:${env.port}`);
-      console.log(`Email: ${env.resendApiKey ? "Resend" : env.smtpHost ? "SMTP" : "disabled (no RESEND_API_KEY)"}`);
+      console.log(
+        `Email: ${env.resendApiKey ? `Resend from ${env.resendFrom}` : env.smtpHost ? "SMTP" : "disabled (no RESEND_API_KEY)"}`
+      );
       resolve();
     });
     server.on("error", reject);
