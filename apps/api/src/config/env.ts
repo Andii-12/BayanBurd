@@ -13,7 +13,11 @@ for (const file of envFiles) {
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT || 4000),
-  mongodbUri: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/bayan_burd_eternity",
+  mongodbUri:
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URL ||
+    process.env.DATABASE_URL ||
+    "mongodb://127.0.0.1:27017/bayan_burd_eternity",
   jwtSecret: process.env.JWT_SECRET || "dev-access-secret-change-me",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "dev-refresh-secret-change-me",
   jwtAccessExpires: process.env.JWT_ACCESS_EXPIRES || "15m",

@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import path from "path";
 import { env } from "./config/env";
-import { connectDb } from "./config/db";
+import { connectDbWithRetry } from "./config/db";
 import { errorHandler } from "./utils/http";
 import authRoutes from "./routes/auth";
 import catalogRoutes from "./routes/catalog";
@@ -22,7 +22,6 @@ import adminRoutes from "./routes/admin";
 import dashboardRoutes from "./routes/dashboard";
 
 async function main() {
-  await connectDb();
   const app = express();
   app.set("trust proxy", 1);
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
@@ -36,6 +35,9 @@ async function main() {
   app.use(express.json({ limit: "2mb" }));
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
+  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
+
+  app.get("/api/health", (_req, res) => res.json({ ok: true, name: "Bayan Burd Eternity API" }));
   app.use(
     "/api",
     rateLimit({
@@ -45,9 +47,6 @@ async function main() {
       legacyHeaders: false,
     })
   );
-  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
-
-  app.get("/api/health", (_req, res) => res.json({ ok: true, name: "Bayan Burd Eternity API" }));
   app.use("/api/auth", authRoutes);
   app.use("/api", catalogRoutes);
   app.use("/api/orders", orderRoutes);
@@ -62,10 +61,17 @@ async function main() {
   app.use("/api/dashboard", dashboardRoutes);
 
   app.use(errorHandler);
-  app.listen(env.port, () => {
-    console.log(`API listening on ${env.port}`);
-    console.log(`Email: ${env.resendApiKey ? "Resend" : env.smtpHost ? "SMTP" : "disabled (no RESEND_API_KEY)"}`);
+
+  await new Promise<void>((resolve, reject) => {
+    const server = app.listen(env.port, "0.0.0.0", () => {
+      console.log(`API listening on 0.0.0.0:${env.port}`);
+      console.log(`Email: ${env.resendApiKey ? "Resend" : env.smtpHost ? "SMTP" : "disabled (no RESEND_API_KEY)"}`);
+      resolve();
+    });
+    server.on("error", reject);
   });
+
+  await connectDbWithRetry();
 }
 
 main().catch((err) => {
