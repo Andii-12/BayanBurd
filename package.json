@@ -11,7 +11,9 @@
     "dev": "concurrently -n api,web -c green,cyan \"npm run dev:api\" \"npm run dev:web\"",
     "dev:web": "npm run dev -w @bbe/web",
     "dev:api": "npm run dev -w @bbe/api",
-    "build": "npm run build --workspaces --if-present",
+    "build:packages": "npm run build -w @bbe/types && npm run build -w @bbe/validation",
+    "build:api": "npm run build -w @bbe/api",
+    "build": "npm run build:packages && npm run build:api && npm run build -w @bbe/web",
     "seed": "npm run seed -w @bbe/api",
     "lint": "npm run lint --workspaces --if-present"
   },
